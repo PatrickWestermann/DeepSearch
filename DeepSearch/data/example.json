@@ -1,0 +1,60 @@
+{'PubmedArticleSet': {'PubmedArticle': [
+      {'MedlineCitation': {'@Status': 'PubMed-not-MEDLINE',
+     '@Owner': 'NLM',
+     'PMID': {'@Version': '1', '#text': '35474694'
+          },
+     'DateRevised': {'Year': '2022', 'Month': '07', 'Day': '16'
+          },
+     'Article': {'@PubModel': 'Electronic-eCollection',
+      'Journal': {'ISSN': {'@IssnType': 'Electronic', '#text': '2667-2375'
+              },
+       'JournalIssue': {'@CitedMedium': 'Internet',
+        'Volume': '1',
+        'Issue': '1',
+        'PubDate': {'Year': '2021', 'Month': 'May', 'Day': '24'
+                }
+              },
+       'Title': 'Cell reports methods',
+       'ISOAbbreviation': 'Cell Rep Methods'
+            },
+      'ArticleTitle': 'Comparative analysis of CI- and CIV-containing respiratory supercomplexes at single-cell resolution.',
+      'Pagination': {'MedlinePgn': '100002'
+            },
+      'ELocationID': {'@EIdType': 'doi',
+       '@ValidYN': 'Y',
+       '#text': '10.1016/j.crmeth.2021.100002'
+            },
+      'Abstract': {'AbstractText': 'Mitochondria sustain the energy demand of the cell. The composition and functional state of the mitochondrial oxidative phosphorylation system are informative indicators of organelle bioenergetic capacity. Here, we describe a highly sensitive and reproducible method for a single-cell quantification of mitochondrial CI- and CIV-containing respiratory supercomplexes (CI∗CIV-SCs) as an alternative means of assessing mitochondrial respiratory chain integrity. We apply a proximity ligation assay (PLA) and stain CI∗CIV-SCs in fixed human and mouse brains, tumorigenic cells, induced pluripotent stem cells (iPSCs) and iPSC-derived neural precursor cells (NPCs), and neurons. Spatial visualization of CI∗CIV-SCs enables the detection of mitochondrial lesions in various experimental models, including complex tissues undergoing degenerative processes. We report that comparative assessments of CI∗CIV-SCs facilitate the quantitative profiling of even subtle mitochondrial variations by overcoming the confounding effects that mixed cell populations have on other measurements. Together, our PLA-based analysis of CI∗CIV-SCs is a sensitive and complementary technique for detecting cell-type-specific mitochondrial perturbations in fixed materials.',
+       'CopyrightInformation': '© 2021 The Authors.'
+            },
+      'AuthorList': {'@CompleteYN': 'Y',
+       'Author': [
+                {'@ValidYN': 'Y',
+         'LastName': 'Bertan',
+         'ForeName': 'Fabio',
+         'Initials': 'F',
+         'AffiliationInfo': {'Affiliation': 'German Center for Neurodegenerative Diseases (DZNE), Deutsches Zentrum für Neurodegenerative Erkrankungen (DZNE), Venusberg-Campus 1, Gebäude 99, Bonn, North Rhine-Westphalia 53127, Germany.'
+                  }
+                },
+...
+          {'@IdType': 'pmcid', '#text': '3910500'
+                }
+              ]
+            }
+          },
+          {'Citation': 'Cerami, E. et al. The cBio cancer genomics portal: an open platform for exploring multidimensional cancer genomics data. Cancer Discov. 2,
+            401–404 (2012).',
+        'ArticleIdList': {'ArticleId': {'@IdType': 'pubmed',
+          '#text': '22588877'
+              }
+            }
+          },
+          {'Citation': 'Gao, J. et al. Integrative analysis of complex cancer genomics and clinical profiles using the cBioPortal. Science Signal. 6, pl1 (2013).'
+          }
+        ]
+      }
+    }
+  }
+]
+}
+}
