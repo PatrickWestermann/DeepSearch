@@ -69,7 +69,7 @@ for article_set in output_list:
                 articletitle = 'No title'
             # authors list
             names = ''
-            affiliations = []
+
             try:
                 authors = divided_dict[10]['MedlineCitation']['Article']['AuthorList']['Author']
             except:
@@ -82,11 +82,9 @@ for article_set in output_list:
                         affiliationinfo = authors[j]['AffiliationInfo']
                         if isinstance(affiliationinfo, list):
                             for aff in affiliationinfo:
-                                splitted = aff['Affiliation'].split()
-                                location = splitted[-2] +" "+ splitted[-1]
+                                location = aff['Affiliation']
                         else:
-                            splitted = aff['Affiliation'].split()
-                            location = splitted[-2] + " "+splitted[-1]
+                            location = affiliationinfo['Affiliation']
                         if j==0:
                             names = fullname
                             affiliations = location
