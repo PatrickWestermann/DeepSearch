@@ -6,12 +6,14 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # PARTICULAR PURPOSE.
 
 # This program built for i386-apple-darwin11.3.0
+ 
 
-# Make data base, printed on Wed Aug 10 17:24:44 2022
+# Make data base, printed on Sat Aug 13 12:03:23 2022
 
 # Variables
 
 # automatic
+ 
 <D = $(patsubst %/,%,$(dir $<))
 # automatic
 ?F = $(notdir $?)
@@ -58,7 +60,7 @@ PYENV_ROOT = /Users/patrickwestermann/.pyenv
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.7L6e7bugrR/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.xt86o63rcE/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
@@ -76,7 +78,7 @@ MAKEFILEPATH := /Applications/Xcode.app/Contents/Developer/Makefiles
 # environment
 VSCODE_CLI = 1
 # environment
-VSCODE_CODE_CACHE_PATH = /Users/patrickwestermann/Library/Application Support/Code/CachedData/da76f93349a72022ca4670c1b84860304616aaa2
+VSCODE_CODE_CACHE_PATH = /Users/patrickwestermann/Library/Application Support/Code/CachedData/6d9b74a70ca9c7733b29f0456fd8195364076dda
 # environment
 LOGNAME = patrickwestermann
 # environment
@@ -104,7 +106,7 @@ USER = patrickwestermann
 # makefile
 .DEFAULT_GOAL := install_requirements
 # environment
-TERM_SESSION_ID = 5981B734-D760-43FD-B891-CA39A94667A9
+TERM_SESSION_ID = 4E3E8A93-9882-4AC0-A072-7F8397B5FE25
 # environment
 LESS = -R
 # automatic
@@ -120,7 +122,7 @@ TMPDIR = /var/folders/qq/yp7f_5hx50199_p69xnvrls80000gn/T/
 # automatic
 *F = $(notdir $*)
 # environment
-VSCODE_IPC_HOOK = /Users/patrickwestermann/Library/Application Support/Code/1.70.0-main.sock
+VSCODE_IPC_HOOK = /Users/patrickwestermann/Library/Application Support/Code/1.70.1-main.sock
 # environment
 MallocNanoZone = 0
 # environment
@@ -136,7 +138,7 @@ TERM_PROGRAM_VERSION = 445
 # environment
 NVM_DIR = /Users/patrickwestermann/.nvm
 # environment
-XPC_SERVICE_NAME = application.com.microsoft.VSCode.21802539.21802545.F120C71A-B947-4288-B3BC-95245B6DA7AF
+XPC_SERVICE_NAME = application.com.microsoft.VSCode.21802539.21802545.631516C0-4D0A-4864-B444-F4F8E5F0EDF4
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # automatic
@@ -174,8 +176,9 @@ LANG = C
 # environment
 TERM = xterm-256color
 # environment
-VSCODE_PID = 13430
+VSCODE_PID = 2294
 # variable set hash-table stats:
+ 
 # Load=82/1024=8%, Rehash=0, Collisions=2/108=2%
 
 # Pattern-specific Variable Values
@@ -184,7 +187,7 @@ VSCODE_PID = 13430
 
 # Directories
 
-# . (device 16777234, inode 22310277): 17 files, no impossibilities.
+# . (device 16777233, inode 22310277): 17 files, no impossibilities.
 
 # 17 files, no impossibilities in 1 directories.
 
@@ -198,6 +201,7 @@ black:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
+ 
 #  commands to execute (from `Makefile', line 11):
 	@black scripts/* DeepSearch/*.py
 	
@@ -304,7 +308,6 @@ clean:
 # automatic
 # + := 
 # automatic
- 
 # | := 
 # automatic
 # < := 
@@ -360,6 +363,6 @@ install:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Wed Aug 10 17:24:44 2022
+# Finished Make data base on Sat Aug 13 12:03:23 2022
 
  
