@@ -158,9 +158,10 @@ def csv_generator(query_input,counter=2000):
             except:
                 bad_lines_counter += 1
     print("there were ",bad_lines_counter," line failures, we are ommiting them from the output")
-    df = pd.DataFrame(article_list)
-    name = "data/" + query.replace("+","_") + "_data_" + str(count_test) + ".csv"
-    df.to_csv(name)
+    #df = pd.DataFrame(article_list)
+    #name = "data/" + query.replace("+","_") + "_data_" + str(count_test) + ".csv"
+    #df.to_csv(name)
+    return article_list
 
 if __name__ == "__main__":
     csv_generator("implant neuroscience mouse",4000)
