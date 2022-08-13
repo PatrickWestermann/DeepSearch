@@ -6,7 +6,7 @@ import timeit
 
 api_key = "857be3304fd504d7d4901fc8a7d12d221408"
 
-query = 'mouse+brain+imaging'
+query = input('Give me terms: ').replace(' ','+')
 base = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
 url = base + "esearch.fcgi?db=pubmed&term=" + query + "&usehistory=y"
 
@@ -22,7 +22,7 @@ count = dict_output_esearch['eSearchResult']['Count']
 
 retmax = 50
 retstart = 0
-count_test = 500
+count_test = int(input('Give me how many: '))
 
 output_list = []
 article_list = []
@@ -51,23 +51,37 @@ for article_set in output_list:
             volume= divided_dict[i]['MedlineCitation']['Article']['Journal']['JournalIssue']['Volume']
         except:
             volume = '1'
-
+        ## Title
+        try:
+            articletitle = divided_dict[i]['MedlineCitation']['Article']['ArticleTitle']
+        except:
+            articletitle = 'No title'
         # authors list
         names = ''
+        affiliations = []
         try:
-            authors = divided_dict[i]['MedlineCitation']['Article']['AuthorList']['Author']
+            authors = divided_dict[10]['MedlineCitation']['Article']['AuthorList']['Author']
         except:
             authors = 'None'
             names = authors
         if authors!= "None":
-
             for j in range(len(authors)):
                 try:
                     fullname = authors[j]['LastName'] + ' ' + authors[j]['ForeName']
+                    affiliationinfo = authors[j]['AffiliationInfo']
+                    if isinstance(affiliationinfo, list):
+                        for aff in affiliationinfo:
+                            splitted = aff['Affiliation'].split()
+                            location = splitted[-2] +" "+ splitted[-1]
+                    else:
+                        splitted = aff['Affiliation'].split()
+                        location = splitted[-2] + " "+splitted[-1]
                     if j==0:
                         names = fullname
+                        affiliations = location
                     else:
                         names+= ", " + fullname
+                        affiliations+= ", " + location
                 except:
                     pass
         ## Mesh Words
@@ -85,15 +99,25 @@ for article_set in output_list:
                     keywords+= ", " + meshs[mesh]['DescriptorName']['#text']
         else:
             keywords="None"
+        ## citations
+        try:
+            citations = len(divided_dict[i]['PubmedData']['ReferenceList']['Reference'])
+        except:
+            citations = 0
+
         article = {
             'PMID':divided_dict[i]['MedlineCitation']['PMID']['#text'],
             'abstract':abstract,
-            'title':divided_dict[i]['MedlineCitation']['Article']['Journal']['Title'],
+            'articleTitle': articletitle,
+            'Journaltitle':divided_dict[i]['MedlineCitation']['Article']['Journal']['Title'],
             'volume':volume,
             'pubDate':''.join([f'{value}-' for key, value in divided_dict[i]['MedlineCitation']['Article']['Journal']['JournalIssue']['PubDate'].items()])[:-1],
             'authors': names,
-            'MeSh':keywords
+            'MeSh':keywords,
+            'citations':citations,
+            'affiliations':affiliations
         }
         article_list.append(article)
-
-pd.DataFrame(article_list)
+df = pd.DataFrame(article_list)
+name = query.replace("+","_") + "_data_" + str(count_test) + ".csv"
+df.to_csv(name)
