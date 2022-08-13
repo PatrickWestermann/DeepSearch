@@ -1,6 +1,6 @@
 '''In this file, I collected my ideas for the most important search terms,
 which we can feed into the api donwloader to build our database - love Patrick'''
-# All lists should contain about 150K articles combined
+# All lists should contain about 120-150K articles combined
 
 search_terms_list_1 = ["neuronal circuit","voltage imaging","brain imaging animal"]
 search_terms_list_2 = ["in vivo imaging","multiphoton","optogenetics","intravital","pre-clinical"]
@@ -14,6 +14,6 @@ search_terms_dict = {search_01:"neuronal circuit", rescount_search_01: 36695,
                      search_05:"multiphoton", rescount_search_05: 8620,
                      search_06:"optogenetics", rescount_search_06: 9182,
                      search_07:"intravital", rescount_search_07: 9715,
-                     search_08:"pre-clinical", rescount_search_08:22833
+                     search_08:"pre-clinical", rescount_search_08:22833,
                      search_09:"patchclamp", rescount_search_09: 19705,
                      search_10:"neurodegenerative", rescount_search_10:129444}
