@@ -128,7 +128,19 @@ for article_set in output_list:
                         secondary_keywords += ', ' + keys[key]['#text']
             except:
                 pass
-
+            # Is review article?
+            pubtypes = divided_dict[i]['MedlineCitation']['Article']['PublicationTypeList']['PublicationType']
+            isreview = 0
+            if isinstance(pubtypes,list):
+                for elem in pubtypes:
+                    if "Review" in elem['#text']:
+                        isreview = 1
+                        break
+            else:
+                for key,value in pubtypes.items():
+                    if "Review" in value:
+                        isreview = 1
+                        break
             article = {
                 'PMID':divided_dict[i]['MedlineCitation']['PMID']['#text'],
                 'abstract':abstract,
@@ -140,7 +152,8 @@ for article_set in output_list:
                 'MeSh':keywords,
                 'citations':citations,
                 'affiliations':affiliations,
-                'keywords': secondary_keywords
+                'keywords': secondary_keywords,
+                'IsReviewArticle':isreview
             }
             article_list.append(article)
         except:
