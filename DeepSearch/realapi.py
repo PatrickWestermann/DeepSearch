@@ -141,7 +141,7 @@ def csv_generator(query_input,counter=2000):
                             isreview = 1
                             break
                 article = {
-                    'PMID':divided_dict[i]['MedlineCitation']['PMID']['#text'],
+                    '_id':divided_dict[i]['MedlineCitation']['PMID']['#text'],
                     'abstract':abstract,
                     'articleTitle': articletitle,
                     'Journaltitle':divided_dict[i]['MedlineCitation']['Article']['Journal']['Title'],

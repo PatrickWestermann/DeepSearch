@@ -1,5 +1,5 @@
 make --dry-run --always-make --keep-going --print-directory
-make: Entering directory `/Users/patrickwestermann/code/PatrickWestermann/DeepSearch'
+make: Entering directory '/home/lbamagalhaes/code/PatrickWestermann/DeepSearch'
 pip install -r requirements.txt
-make: Leaving directory `/Users/patrickwestermann/code/PatrickWestermann/DeepSearch'
+make: Leaving directory '/home/lbamagalhaes/code/PatrickWestermann/DeepSearch'
  
