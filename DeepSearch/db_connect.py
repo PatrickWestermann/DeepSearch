@@ -9,7 +9,7 @@ def create_connection(db_file):
         in the memory
     """
     abs_path = os.path.dirname(os.path.abspath(__file__))
-    path = abs_path + '/' + db_file
+    path = abs_path + '/data/' + db_file
     print(path)
     conn = None;
     try:
