@@ -3,8 +3,9 @@ import pandas as pd
 import numpy as np
 import xmltodict
 import timeit
+import pymongo
 
-def csv_generator(query_input,counter=2000):
+def csv_generator(query_input,counter=2000, return_list=False):
     api_key = "857be3304fd504d7d4901fc8a7d12d221408"
 
     query = query_input
@@ -29,6 +30,7 @@ def csv_generator(query_input,counter=2000):
     article_list = []
     start = timeit.timeit()
     bad_lines_counter = 0
+    duplicates = 0
 
     while retstart < count_test:
         efetch_url = base + "efetch.fcgi?db=pubmed&WebEnv="+web+"&query_key="+key+"&retstart="+str(retstart)+"&retmax="+str(retmax)+"&rettype=xml&retmode=xml"+"&api_key"+api_key
@@ -154,14 +156,31 @@ def csv_generator(query_input,counter=2000):
                     'keywords': secondary_keywords,
                     'IsReviewArticle':isreview
                 }
-                article_list.append(article)
+                # article_list.append(article)
+                try:
+                    insertid = mycol.insert_one(article)
+                except:
+                    duplicates += 1
             except:
                 bad_lines_counter += 1
     print("there were ",bad_lines_counter," line failures, we are ommiting them from the output")
-    #df = pd.DataFrame(article_list)
-    #name = "data/" + query.replace("+","_") + "_data_" + str(count_test) + ".csv"
-    #df.to_csv(name)
-    return article_list
+    # df = pd.DataFrame(article_list)
+    # name = "data/" + query.replace("+","_") + "_data_" + str(count_test) + ".csv"
+    # df.to_csv(name)
+    print("there were ", str(duplicates), " Duplicates in the insertion: ", query_input)
+    if return_list:
+        return article_list
+    else:
+        pass
 
 if __name__ == "__main__":
-    csv_generator("implant neuroscience mouse",4000)
+    search_terms_list_1 = ["imaging","clinical", "vivo imaging","photon","optics","intravene"]
+    myclient = pymongo.MongoClient("mongodb+srv://alf-deepen:GWvfeEk5w5TgcXSa@cluster0.ixkyxa7.mongodb.net/?retryWrites=true&w=majority")
+    mydb = myclient["papers"]
+    mycol = mydb["researchpapers"]
+    duplicates = 0
+    for item in search_terms_list_1:
+        print('Querying ', item)
+        csv_generator(item,100)
+
+        print("done with element: ",item)

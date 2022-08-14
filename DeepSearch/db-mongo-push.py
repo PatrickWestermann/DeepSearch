@@ -6,8 +6,6 @@ mydb = myclient["papers"]
 mycol = mydb["researchpapers"]
 
 container = [
-    ["neuronal circuit",36695],
-    ["voltage imaging",13362],
     ["brain imaging animal",75055]
 ]
 
@@ -17,7 +15,7 @@ for item in container:
     duplicates = 0
     for document in mylist:
         try:
-            insertid = mycol.insert_many(document)
+            insertid = mycol.insert_one(document)
         except:
             duplicates += 1
 
