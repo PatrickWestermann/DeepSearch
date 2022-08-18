@@ -3,9 +3,12 @@ import pandas as pd
 import numpy as np
 import xmltodict
 import timeit
-import pymongo
 
-def csv_generator(query_input,counter=2000, return_list=False):
+import sqlite3
+from sqlalchemy import create_engine
+
+
+def get_api_as_df(query_input, counter=2000):
     api_key = "857be3304fd504d7d4901fc8a7d12d221408"
 
     query = query_input
@@ -30,10 +33,11 @@ def csv_generator(query_input,counter=2000, return_list=False):
     article_list = []
     start = timeit.timeit()
     bad_lines_counter = 0
-    duplicates = 0
 
     while retstart < count_test:
-        efetch_url = base + "efetch.fcgi?db=pubmed&WebEnv="+web+"&query_key="+key+"&retstart="+str(retstart)+"&retmax="+str(retmax)+"&rettype=xml&retmode=xml"+"&api_key"+api_key
+        efetch_url = base + "efetch.fcgi?db=pubmed&WebEnv="+web+"&query_key="+key+"&retstart=" + \
+            str(retstart)+"&retmax="+str(retmax) + \
+            "&rettype=xml&retmode=xml"+"&api_key"+api_key
         output = requests.get(efetch_url)
         output_list.append(xmltodict.parse(output.content))
         retstart += retmax
@@ -55,14 +59,14 @@ def csv_generator(query_input,counter=2000, return_list=False):
                     abstract = divided_dict[i]['MedlineCitation']['Article']['Abstract']['AbstractText']['#text']
                 except:
                     abstract = divided_dict[i]['MedlineCitation']['Article']['Abstract']['AbstractText']
-                    if isinstance(abstract,list):
-                        grouped_texts= ''
+                    if isinstance(abstract, list):
+                        grouped_texts = ''
                         for subabstract in abstract:
                             grouped_texts += subabstract['#text'] + " "
                         abstract = grouped_texts
 
                 try:
-                    volume= divided_dict[i]['MedlineCitation']['Article']['Journal']['JournalIssue']['Volume']
+                    volume = divided_dict[i]['MedlineCitation']['Article']['Journal']['JournalIssue']['Volume']
                 except:
                     volume = '1'
                 ## Title
@@ -78,22 +82,23 @@ def csv_generator(query_input,counter=2000, return_list=False):
                 except:
                     authors = 'None'
                     names = authors
-                if authors!= "None":
+                if authors != "None":
                     for j in range(len(authors)):
                         try:
-                            fullname = authors[j]['LastName'] + ' ' + authors[j]['ForeName']
+                            fullname = authors[j]['LastName'] + \
+                                ' ' + authors[j]['ForeName']
                             affiliationinfo = authors[j]['AffiliationInfo']
                             if isinstance(affiliationinfo, list):
                                 for aff in affiliationinfo:
                                     location = aff['Affiliation']
                             else:
                                 location = affiliationinfo['Affiliation']
-                            if j==0:
+                            if j == 0:
                                 names = fullname
                                 affiliations = location
                             else:
-                                names+= ", " + fullname
-                                affiliations+= ", " + location
+                                names += ", " + fullname
+                                affiliations += ", " + location
                         except:
                             pass
                 ## Mesh Words
@@ -103,17 +108,19 @@ def csv_generator(query_input,counter=2000, return_list=False):
                     meshs = "None"
 
                 keywords = ''
-                if meshs!="None":
+                if meshs != "None":
                     for mesh in range(len(meshs)):
                         if mesh == 0:
-                            keywords+= meshs[mesh]['DescriptorName']['#text']
+                            keywords += meshs[mesh]['DescriptorName']['#text']
                         else:
-                            keywords+= ", " + meshs[mesh]['DescriptorName']['#text']
+                            keywords += ", " + \
+                                meshs[mesh]['DescriptorName']['#text']
                 else:
-                    keywords="None"
+                    keywords = "None"
                 ## citations
                 try:
-                    citations = len(divided_dict[i]['PubmedData']['ReferenceList']['Reference'])
+                    citations = len(
+                        divided_dict[i]['PubmedData']['ReferenceList']['Reference'])
                 except:
                     citations = 0
 
@@ -132,62 +139,50 @@ def csv_generator(query_input,counter=2000, return_list=False):
                 # Is review article?
                 pubtypes = divided_dict[i]['MedlineCitation']['Article']['PublicationTypeList']['PublicationType']
                 isreview = 0
-                if isinstance(pubtypes,list):
+                if isinstance(pubtypes, list):
                     for elem in pubtypes:
                         if "Review" in elem['#text']:
                             isreview = 1
                             break
                 else:
-                    for key,value in pubtypes.items():
+                    for key, value in pubtypes.items():
                         if "Review" in value:
                             isreview = 1
                             break
                 article = {
-                    '_id':divided_dict[i]['MedlineCitation']['PMID']['#text'],
-                    'abstract':abstract,
+                    'PMID': divided_dict[i]['MedlineCitation']['PMID']['#text'],
+                    'abstract': abstract,
                     'articleTitle': articletitle,
-                    'Journaltitle':divided_dict[i]['MedlineCitation']['Article']['Journal']['Title'],
-                    'volume':volume,
-                    'pubDate':''.join([f'{value}-' for key, value in divided_dict[i]['MedlineCitation']['Article']['Journal']['JournalIssue']['PubDate'].items()])[:-1],
+                    'Journaltitle': divided_dict[i]['MedlineCitation']['Article']['Journal']['Title'],
+                    'volume': volume,
+                    'pubDate': ''.join([f'{value}-' for key, value in divided_dict[i]['MedlineCitation']['Article']['Journal']['JournalIssue']['PubDate'].items()])[:-1],
                     'authors': names,
-                    'MeSh':keywords,
-                    'citations':citations,
-                    'affiliations':affiliations,
+                    'MeSh': keywords,
+                    'citations': citations,
+                    'affiliations': affiliations,
                     'keywords': secondary_keywords,
-                    'IsReviewArticle':isreview
+                    'IsReviewArticle': isreview
                 }
-                # article_list.append(article)
-                try:
-                    insertid = mycol.insert_one(article)
-                except:
-                    duplicates += 1
+                article_list.append(article)
             except:
                 bad_lines_counter += 1
-    print("there were ",bad_lines_counter," line failures, we are ommiting them from the output")
-<<<<<<< HEAD
+    print("there were ", bad_lines_counter,
+          " line failures, we are ommiting them from the output")
     df = pd.DataFrame(article_list)
-    name = "data/" + query.replace("+","_") + "_data_" + str(count_test) + ".csv"
-    df.to_csv(name)
-    return article_list
-=======
-    # df = pd.DataFrame(article_list)
-    # name = "data/" + query.replace("+","_") + "_data_" + str(count_test) + ".csv"
-    # df.to_csv(name)
-    print("there were ", str(duplicates), " Duplicates in the insertion: ", query_input)
-    if return_list:
-        return article_list
-    else:
-        pass
->>>>>>> a299740193c144728a6082133f7dd28eedbc7d66
+    return df
+
+
+def add_df_to_db(db, df, table_name):
+    """Take a data frame and add it to a sqlite db"""
+    df = df.applymap(str)
+    engine = create_engine('sqlite:///'+db, echo=False)
+    df.to_sql(str(table_name), con=engine, if_exists='replace')
+
 
 if __name__ == "__main__":
-    search_terms_list_1 = ["imaging","clinical", "vivo imaging","photon","optics","intravene"]
-    myclient = pymongo.MongoClient("mongodb+srv://alf-deepen:GWvfeEk5w5TgcXSa@cluster0.ixkyxa7.mongodb.net/?retryWrites=true&w=majority")
-    mydb = myclient["papers"]
-    mycol = mydb["researchpapers"]
-    duplicates = 0
-    for item in search_terms_list_1:
-        print('Querying ', item)
-        csv_generator(item,100)
-
-        print("done with element: ",item)
+    db = "data/sqlite_test.db"
+    input = "implant neuroscience mouse"
+    count = 4000
+    df = get_api_as_df(input, count)
+    add_df_to_db(db, df, "TestTable")
+    #print(get_api_as_df(input, count))
