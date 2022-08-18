@@ -164,6 +164,12 @@ def csv_generator(query_input,counter=2000, return_list=False):
             except:
                 bad_lines_counter += 1
     print("there were ",bad_lines_counter," line failures, we are ommiting them from the output")
+<<<<<<< HEAD
+    df = pd.DataFrame(article_list)
+    name = "data/" + query.replace("+","_") + "_data_" + str(count_test) + ".csv"
+    df.to_csv(name)
+    return article_list
+=======
     # df = pd.DataFrame(article_list)
     # name = "data/" + query.replace("+","_") + "_data_" + str(count_test) + ".csv"
     # df.to_csv(name)
@@ -172,6 +178,7 @@ def csv_generator(query_input,counter=2000, return_list=False):
         return article_list
     else:
         pass
+>>>>>>> a299740193c144728a6082133f7dd28eedbc7d66
 
 if __name__ == "__main__":
     search_terms_list_1 = ["imaging","clinical", "vivo imaging","photon","optics","intravene"]

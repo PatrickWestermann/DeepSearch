@@ -6,7 +6,12 @@ mydb = myclient["papers"]
 mycol = mydb["researchpapers"]
 
 container = [
+<<<<<<< HEAD
+    ["patchclamp",19705],
+    ["neurodegenerative",129444]
+=======
     ["brain imaging animal",75055]
+>>>>>>> a299740193c144728a6082133f7dd28eedbc7d66
 ]
 
 for item in container:
