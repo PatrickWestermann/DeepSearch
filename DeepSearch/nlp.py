@@ -15,16 +15,14 @@ import csv
 
 class NLP():
 
-    def __init__(self,length=20000):
+    def __init__(self):
 
         """import data from MongoDB"""
 
         myclient = pymongo.MongoClient("mongodb+srv://lucas-deepen:DSIqP935gtFobYc2@cluster0.ixkyxa7.mongodb.net/?retryWrites=true&w=majority")
         mydb = myclient["cleanpapers"]
         mycol = mydb["cleanedf"]
-        mydoc = mycol.find({}, {"_id":1,"abstract":1})
-        self.df = pd.DataFrame(list(mydoc)).set_index(['_id'])
-        self.length = length
+        self.mydoc = mycol.find({}, {"_id":1,"abstract":1})
 
         print('----------Data imported----------')
 
@@ -74,11 +72,15 @@ class NLP():
 
         return cleaned_txt
 
-    def tokenize(self):
+    def tokenize(self,length=50000):
 
         """generate tokenized dataframe"""
 
-        df = self.df
+        # data to dataframe and limit length
+
+        df = pd.DataFrame(list(self.mydoc)).set_index(['_id'])
+
+        df = df[df.abstract != '.'].iloc[:length,:]
 
         # apply clean function to abstracts
 
@@ -108,15 +110,21 @@ class NLP():
 
         return self.weighted_words
 
-    def rank(self,words=['brain','mouse','animal','image','vivo','injury','intravital','voltage','circuit','neuronal','multiphoton','optogenetics','preclinical']):
+    def rank(self,weightedwords=None,words=['brain','mouse','animal','image','vivo','injury','intravital','voltage','circuit','neuronal','multiphoton','optogenetics','preclinical']):
 
         """rank abstracts based on chosen words"""
 
-        self.tokenize()
-
         # clean tokenized data frame
 
-        selected_tokens = self.weighted_words[words].replace('',0).astype(float)
+        if weightedwords == None:
+
+            self.tokenize()
+
+            selected_tokens = self.weighted_words[words].replace('',0).astype(float)
+
+        else:
+
+            selected_tokens = weightedwords[words].replace('',0).astype(float)
 
         # remove rows with only 0 results
 
@@ -166,4 +174,4 @@ if __name__ == '__main__':
 
     nlp = NLP()
 
-    print(nlp.rank())
+    print(nlp.rank().head(15))
