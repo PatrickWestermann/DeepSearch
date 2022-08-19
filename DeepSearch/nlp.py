@@ -4,14 +4,8 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import string
-import warnings
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.neighbors import NearestNeighbors
-import dtale
+from sklearn.feature_extraction.text import TfidfVectorizer
 import pymongo
-import csv
-
 
 class NLP():
 
