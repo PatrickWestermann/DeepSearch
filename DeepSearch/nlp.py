@@ -7,165 +7,183 @@ import string
 from sklearn.feature_extraction.text import TfidfVectorizer
 import pymongo
 
-class NLP():
+def get_data():
 
-    def __init__(self):
+    """import data from MongoDB"""
 
-        """import data from MongoDB"""
+    myclient = pymongo.MongoClient("mongodb+srv://lucas-deepen:DSIqP935gtFobYc2@cluster0.ixkyxa7.mongodb.net/?retryWrites=true&w=majority")
+    mydb = myclient["cleanpapers"]
+    mycol = mydb["cleanedf"]
+    mydoc = mycol.find({}, {"_id":1,"abstract":1})
 
-        myclient = pymongo.MongoClient("mongodb+srv://lucas-deepen:DSIqP935gtFobYc2@cluster0.ixkyxa7.mongodb.net/?retryWrites=true&w=majority")
-        mydb = myclient["cleanpapers"]
-        mycol = mydb["cleanedf"]
-        self.mydoc = mycol.find({}, {"_id":1,"abstract":1})
+    print('----------Data imported----------')
 
-        print('----------Data imported----------')
+    return mydoc
 
-    def cleaning(self,text):
+def cleaning(text):
 
-        """cleaning function for the abstract"""
+    """cleaning function for the abstract"""
 
-        # transform abtract words into lower case
+    # transform abtract words into lower case
 
-        text = text.lower()
+    text = text.lower()
 
-        # remove punctuations
+    # remove punctuations
 
-        for punctuation in string.punctuation:
+    for punctuation in string.punctuation:
 
-            text = text.replace(punctuation,'')
+        text = text.replace(punctuation,'')
 
-        # remove digits
+    # remove digits
 
-        text = ''.join(char for char in text if not char.isdigit())
+    text = ''.join(char for char in text if not char.isdigit())
 
-        # tokenize sentences
+    # tokenize sentences
 
-        tokenized_text = word_tokenize(text)
+    tokenized_text = word_tokenize(text)
 
-        # remove stop words
+    # remove stop words
 
-        stop_words = set(stopwords.words('english'))
+    stop_words = set(stopwords.words('english'))
 
 
-        tokenized_sentence_cleaned = [w for w in tokenized_text
-                                    if not w in stop_words]
+    tokenized_sentence_cleaned = [w for w in tokenized_text
+                                if not w in stop_words]
 
-        # standardize verbs
+    # standardize verbs
 
-        verb_lemmatized = [WordNetLemmatizer().lemmatize(word, pos = "v")
-                for word in tokenized_sentence_cleaned]
+    verb_lemmatized = [WordNetLemmatizer().lemmatize(word, pos = "v")
+            for word in tokenized_sentence_cleaned]
 
-        # standardize nouns
+    # standardize nouns
 
-        noun_lemmatized = [WordNetLemmatizer().lemmatize(word, pos = "n")  # n --> nouns
-                for word in verb_lemmatized]
+    noun_lemmatized = [WordNetLemmatizer().lemmatize(word, pos = "n")  # n --> nouns
+            for word in verb_lemmatized]
 
-        # re-join list into sentence
+    # re-join list into sentence
 
-        cleaned_txt = " ".join(noun_lemmatized)
+    cleaned_txt = " ".join(noun_lemmatized)
 
-        return cleaned_txt
+    return cleaned_txt
 
-    def tokenize(self,length=50000):
+def dataframe(mydoc,length=50000):
 
-        """generate tokenized dataframe"""
+    # data to dataframe and limit length
 
-        # data to dataframe and limit length
+    df = pd.DataFrame(list(mydoc)).set_index(['_id'])
 
-        df = pd.DataFrame(list(self.mydoc)).set_index(['_id'])
+    df = df[df.abstract != '.'].iloc[:length,:]
 
-        df = df[df.abstract != '.'].iloc[:length,:]
+    print ('----------DataFrame created----------')
 
-        # apply clean function to abstracts
+    print (df.head(15))
 
-        df.abstract = df.abstract.astype(str).apply(self.cleaning)
+    return df
 
-        print ('----------Abstract cleaned----------')
+def tokenize(df):
 
-        # intitialize vectorizer model
+    """generate tokenized dataframe"""
 
-        tfidf_vectorizer = TfidfVectorizer(use_idf=False,
-                                   analyzer='word',
-                                   stop_words='english',
-                                   max_df=0.6,min_df=15,
-                                   token_pattern=r'(?u)\b[A-Za-z]{4,}\b',
-                                   max_features=10000)
+    df_ = df
 
-        # fit_transform abstract
+    # apply clean function to abstracts
 
-        tfidf_abstract = tfidf_vectorizer.fit_transform(df.abstract)
+    df_.abstract = df_.abstract.astype(str).apply(cleaning)
 
-        # create data frame with columns names
+    print ('----------Abstract cleaned----------')
 
-        self.weighted_words = pd.DataFrame(tfidf_abstract.toarray(),
-                 columns = tfidf_vectorizer.get_feature_names(),index=df.index)
+    # intitialize vectorizer model
 
-        print ('----------Abstract tokenized----------')
+    tfidf_vectorizer = TfidfVectorizer(use_idf=False,
+                                analyzer='word',
+                                stop_words='english',
+                                max_df=0.6,min_df=15,
+                                token_pattern=r'(?u)\b[A-Za-z]{4,}\b',
+                                max_features=10000)
 
-        return self.weighted_words
+    # fit_transform abstract
 
-    def rank(self,weightedwords=None,words=['brain','mouse','animal','image','vivo','injury','intravital','voltage','circuit','neuronal','multiphoton','optogenetics','preclinical']):
+    tfidf_abstract = tfidf_vectorizer.fit_transform(df_.abstract)
 
-        """rank abstracts based on chosen words"""
+    # create data frame with columns names
 
-        # clean tokenized data frame
+    weighted_words = pd.DataFrame(tfidf_abstract.toarray(),
+                columns = tfidf_vectorizer.get_feature_names(),index=df_.index)
 
-        if weightedwords == None:
+    print ('----------Abstract tokenized----------')
 
-            self.tokenize()
+    print (weighted_words.head(15))
 
-            selected_tokens = self.weighted_words[words].replace('',0).astype(float)
+    return weighted_words
 
-        else:
+def rank(token,words=['brain','mouse','animal','image','vivo','injury','intravital','voltage','circuit','neuronal','multiphoton','optogenetics','preclinical']):
 
-            selected_tokens = weightedwords[words].replace('',0).astype(float)
+    """rank abstracts based on chosen words"""
 
-        # remove rows with only 0 results
+    token_df = token
 
-        selected_tokens = selected_tokens.loc[~(selected_tokens==0).all(axis=1)]
+    # clean tokenized data frame
 
-        # create count columns (1 - chosen word was encountered / 0 - chosen word was not encountered)
+    selected_tokens = token_df[words].replace('',0).astype(float)
 
-        columns = selected_tokens.columns
+    # remove rows with only 0 results
 
-        length_words = selected_tokens.shape[1]
+    selected_tokens = selected_tokens.loc[~(selected_tokens==0).all(axis=1)]
 
-        for index, row in selected_tokens.iterrows():
+    # create count columns (1 - chosen word was encountered / 0 - chosen word was not encountered)
 
-            for column in columns:
+    columns = selected_tokens.columns
 
-                new_column = f'{column}_count'
+    length_words = selected_tokens.shape[1]
 
-                if row[column] > 0:
+    for index, row in selected_tokens.iterrows():
 
-                    selected_tokens.loc[index, new_column] = 1
+        for column in columns:
 
-                elif row[column] == 0:
+            new_column = f'{column}_count'
 
-                    selected_tokens.loc[index, new_column] = 0
+            if row[column] > 0:
 
-        # get average frequency of chosen words
+                selected_tokens.loc[index, new_column] = 1
 
-        selected_tokens['mean'] = (selected_tokens[list(columns)].sum(axis=1)) / length_words
+            elif row[column] == 0:
 
-        # get how many chosen words were encountered
+                selected_tokens.loc[index, new_column] = 0
 
-        selected_tokens['count'] = selected_tokens.iloc[: , length_words:-1].sum(axis=1)
+    # get average frequency of chosen words
 
-        # sort rank by 1. how many chosen words were encountered and 2. average frequency of chosen words
+    selected_tokens['mean'] = (selected_tokens[list(columns)].sum(axis=1)) / length_words
 
-        df_rank = selected_tokens.sort_values(by=['count','mean'],ascending=False)[['count','mean']]
+    # get how many chosen words were encountered
 
-        # remove rows with only 0 values
+    selected_tokens['count'] = selected_tokens.iloc[: , length_words:-1].sum(axis=1)
 
-        self.df_rank = df_rank.loc[~(df_rank==0).all(axis=1)]
+    # sort rank by 1. how many chosen words were encountered and 2. average frequency of chosen words
 
-        print ('----------Abstracts ranked----------')
+    df_rank = selected_tokens.sort_values(by=['count','mean'],ascending=False)[['count','mean']]
 
-        return self.df_rank
+    # remove rows with only 0 values
+
+    df_rank = df_rank.loc[~(df_rank==0).all(axis=1)]
+
+    print ('----------Abstracts ranked----------')
+
+    print (df_rank.head(15))
+
+    return df_rank
+
+def main():
+
+    mydoc = get_data()
+    df = dataframe(mydoc)
+    token = tokenize(df)
+    ranked = rank(token)
+
+    print (ranked.head(15))
+
+    return ranked
+
 
 if __name__ == '__main__':
 
-    nlp = NLP()
-
-    print(nlp.rank().head(15))
+    main()
