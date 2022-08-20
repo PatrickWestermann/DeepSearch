@@ -68,11 +68,17 @@ def cleaning(text):
 
 def dataframe(mydoc,length=132820):
 
+    """convert mongodb data to dataframe"""
+
     # data to dataframe and limit length
 
     df = pd.DataFrame(list(mydoc)).set_index(['_id'])
 
     df = df[df.abstract != '.'].iloc[:length,:]
+
+    # extract year from the pubDate column
+
+    df['pubDate']=df['pubDate'].str.extract(r'(\d{4})')
 
     print ('----------DataFrame created----------')
 
@@ -108,13 +114,11 @@ def tokenize(df):
     # create data frame with columns names
 
     weighted_words = pd.DataFrame(tfidf_abstract.toarray(),
-                columns = tfidf_vectorizer.get_feature_names(),index=df_.index)
+                columns = tfidf_vectorizer.get_feature_names(),index=df_.index).round(2)
 
     print ('----------Abstract tokenized----------')
 
     print (weighted_words.head(15))
-
-    weighted_words.to_csv('data/tokenized_df.csv')
 
     return weighted_words
 
@@ -122,7 +126,7 @@ def rank(token,words=['brain','mouse','animal','image','vivo','injury','intravit
 
     """rank abstracts based on chosen words"""
 
-    token_df = token
+    token_df = token.copy()
 
     # clean tokenized data frame
 
@@ -180,8 +184,6 @@ def main():
     df = dataframe(mydoc)
     token = tokenize(df)
     ranked = rank(token)
-
-    print (ranked.head(15))
 
     return ranked
 
