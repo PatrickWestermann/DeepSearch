@@ -68,7 +68,7 @@ def cleaning(text):
 
 def dataframe(mydoc,length=132820):
 
-    """convert mongodb data to dataframe"""
+    """convert mongodb data to dataframe (full = 132820 rows)"""
 
     # data to dataframe and limit length
 
@@ -78,7 +78,7 @@ def dataframe(mydoc,length=132820):
 
     # extract year from the pubDate column
 
-    df['pubDate']=df['pubDate'].str.extract(r'(\d{4})')
+    df['pubDate'] = df['pubDate'].str.extract(r'(\d{4})')
 
     print ('----------DataFrame created----------')
 
