@@ -14,7 +14,7 @@ def get_data():
     myclient = pymongo.MongoClient("mongodb+srv://lucas-deepen:DSIqP935gtFobYc2@cluster0.ixkyxa7.mongodb.net/?retryWrites=true&w=majority")
     mydb = myclient["cleanpapers"]
     mycol = mydb["cleanedf"]
-    mydoc = mycol.find({}, {"_id":1,"abstract":1})
+    mydoc = mycol.find({}, {"_id":1,"articleTitle":1,"abstract":1,"pubDate":1,"affiliations":1})
 
     print('----------Data imported----------')
 
@@ -66,7 +66,7 @@ def cleaning(text):
 
     return cleaned_txt
 
-def dataframe(mydoc,length=50000):
+def dataframe(mydoc,length=132820):
 
     # data to dataframe and limit length
 
@@ -84,7 +84,7 @@ def tokenize(df):
 
     """generate tokenized dataframe"""
 
-    df_ = df
+    df_ = df.copy()
 
     # apply clean function to abstracts
 
