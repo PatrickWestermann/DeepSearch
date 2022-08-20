@@ -114,6 +114,8 @@ def tokenize(df):
 
     print (weighted_words.head(15))
 
+    weighted_words.to_csv('data/tokenized_df.csv')
+
     return weighted_words
 
 def rank(token,words=['brain','mouse','animal','image','vivo','injury','intravital','voltage','circuit','neuronal','multiphoton','optogenetics','preclinical']):
