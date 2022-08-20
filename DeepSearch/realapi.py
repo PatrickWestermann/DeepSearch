@@ -6,7 +6,7 @@ import timeit
 import pymongo
 
 def csv_generator(query_input,counter=2000, return_list=False):
-    api_key = "857be3304fd504d7d4901fc8a7d12d221408"
+    api_key = "857be3304fd504d7d4901fc8a7d12d221408" # bad style
 
     query = query_input
     base = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
