@@ -183,9 +183,8 @@ def main():
     mydoc = get_data()
     df = dataframe(mydoc)
     token = tokenize(df)
-    ranked = rank(token)
 
-    return ranked
+    return token
 
 
 if __name__ == '__main__':
