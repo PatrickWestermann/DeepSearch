@@ -183,6 +183,7 @@ def main():
     mydoc = get_data()
     df = dataframe(mydoc)
     token = tokenize(df)
+    #token.to_csv("tokenized_csv_new.csv")
 
     return token
 
