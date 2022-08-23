@@ -5,13 +5,22 @@ import requests
 import nlp
 
 #token = pd.read_csv('data/tokenized_df.csv')
-
 st.markdown('''
 Hey, here you can use our amazing research locator!
-
-Just put in some topics you are interested in, we take up to 5!
-
+First push teh button to load the most recient database from the cloud!
 ''')
+
+with st.form("get DF"):
+    submitted = st.form_submit_button("Click the button and get the DF")
+    if submitted:
+        df  = nlp.main()
+        st.markdown('''Dataframe loaded sucessfully''')
+
+
+st.markdown('''
+Just put in some topics you are interested in, we take up to 5!
+''')
+
 search_terms = st.text_area('Put in the words')
 
 search_term_list = list(search_terms.split(" "))
