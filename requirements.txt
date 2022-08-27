@@ -31,3 +31,4 @@ termcolor
 xmltodict
 nltk
 pymongo
+wordcloud
