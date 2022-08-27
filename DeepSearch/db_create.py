@@ -4,7 +4,7 @@ import sqlite3
 
 def db_create(db_name):
     """ create a database """
-    name = "data/" + db_name
+    name = db_name
     conn = None
     try:
         conn = sqlite3.connect(name)
