@@ -17,4 +17,4 @@ def db_create(db_name):
 
 
 if __name__ == '__main__':
-    db_create(r"sqlite_test.db")
+    db_create(r"deepsearch.db")

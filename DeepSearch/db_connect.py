@@ -2,7 +2,8 @@ import os
 import sqlite3
 from sqlite3 import Error
 
-db_file = 'deepsearch_db.sqlite'
+db_file = 'deepsearch.db'
+
 
 def create_connection(db_file):
     """ create a database connection to a database that resides
@@ -11,7 +12,7 @@ def create_connection(db_file):
     abs_path = os.path.dirname(os.path.abspath(__file__))
     path = abs_path + '/data/' + db_file
     print(path)
-    conn = None;
+    conn = None
     try:
         conn = sqlite3.connect(path)
         print(sqlite3.version)
