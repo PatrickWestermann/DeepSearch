@@ -28,7 +28,7 @@ class ToolKit:
         """ create a database """
         self.db = db
         self.engine = create_engine(
-            'sqlite:///'+self.db, fast_executemany=True, echo=False)
+            'sqlite:///'+self.db, echo=False)
         print(f"Connected to database >> {db}")
         try:
             with self.engine.connect() as self.conn:
@@ -43,7 +43,7 @@ class ToolKit:
         """
         self.db = db
         self.engine = create_engine(
-            'sqlite:///'+self.db, fast_executemany=True, echo=False)
+            'sqlite:///'+self.db, echo=False)
         print(f"Connected to database >> {db}")
         try:
             with self.engine.connect() as conn:
