@@ -7,6 +7,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy import event
 from sqlalchemy.exc import SQLAlchemyError
 import pandas as pd
+import connectorx as cx
 
 
 class ToolKit:
@@ -25,24 +26,31 @@ class ToolKit:
 
     def create_db(self, db):
         """ create a database """
-        self.conn = None
+        self.db = db
+        self.engine = create_engine(
+            'sqlite:///'+self.db, fast_executemany=True, echo=False)
+        print(f"Connected to database >> {db}")
         try:
-            self.conn = sqlite3.connect(db)
-            print(sqlite3.version)
-        except Error as e:
-            print(e)
-        finally:
-            if self.conn:
-                self.conn.close()
+            with self.engine.connect() as self.conn:
+                self.conn.execute("SELECT 1")
+            print('Engine is valid')
+        except Exception as e:
+            print(f'Engine invalid: {str(e)}')
 
     def connect_db(self, db):
         """ create a database connection to a database that resides
             in the memory
         """
-        self.engine = create_engine('sqlite:////'+db, echo=False)
-        self.engine.connect()
+        self.db = db
+        self.engine = create_engine(
+            'sqlite:///'+self.db, fast_executemany=True, echo=False)
         print(f"Connected to database >> {db}")
-        return self.engine
+        try:
+            with self.engine.connect() as conn:
+                conn.execute("SELECT 1")
+            print('Engine is valid')
+        except Exception as e:
+            print(f'Engine invalid: {str(e)}')
 
     def disconnect_db(self, engine):
         engine.close()
