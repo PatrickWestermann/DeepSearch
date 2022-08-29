@@ -26,13 +26,13 @@ class ToolKit:
 
     def create_db(self, db):
         """ create a database """
-        self.db = db
-        self.engine = create_engine(
-            'sqlite:///'+self.db, echo=False)
+        engine = create_engine(
+            'sqlite:///'+db, echo=False)
         print(f"Connected to database >> {db}")
         try:
-            with self.engine.connect() as self.conn:
-                self.conn.execute("SELECT 1")
+            with engine.connect() as conn:
+                conn.execute("SELECT 1")
+                conn.close()
             print('Engine is valid')
         except Exception as e:
             print(f'Engine invalid: {str(e)}')
@@ -41,9 +41,8 @@ class ToolKit:
         """ create a database connection to a database that resides
             in the memory
         """
-        self.db = db
         self.engine = create_engine(
-            'sqlite:///'+self.db, echo=False)
+            'sqlite:///'+db, echo=False)
         print(f"Connected to database >> {db}")
         try:
             with self.engine.connect() as conn:
@@ -51,9 +50,11 @@ class ToolKit:
             print('Engine is valid')
         except Exception as e:
             print(f'Engine invalid: {str(e)}')
+        return self.engine
 
     def disconnect_db(self, engine):
-        engine.close()
+        self.engine = engine
+        self.engine.close()
         print(f"Disconnected from database")
 
     def create_tbl(self, engine, tbl_name):
