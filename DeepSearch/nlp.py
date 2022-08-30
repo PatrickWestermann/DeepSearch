@@ -14,7 +14,7 @@ def get_data():
     myclient = pymongo.MongoClient("mongodb+srv://lucas-deepen:DSIqP935gtFobYc2@cluster0.ixkyxa7.mongodb.net/?retryWrites=true&w=majority")
     mydb = myclient["cleanpapers"]
     mycol = mydb["cleanedf"]
-    mydoc = mycol.find({}, {"_id":1,"articleTitle":1,"abstract":1,"pubDate":1,"affiliations":1})
+    mydoc = mycol.find({}, {"_id":1,"articleTitle":1,"abstract":1,"pubDate":1,"affiliations":1,"city":1,'lat':1,'lon':1})
 
     print('----------Data imported----------')
 
