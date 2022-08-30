@@ -5,7 +5,7 @@ import pandas as pd
 import nlp
 import timeit
 import matplotlib.pyplot as plt
-import wordcloud
+from wordcloud import WordCloud
 
 st.header('Prototype Research Locator')
 #token = pd.read_csv('data/tokenized_df.csv')
@@ -45,20 +45,22 @@ if load or st.session_state.load_state:
         ids_ranked = nlp.rank(tokenized_df, words = search_term_list)
         return ids_ranked
     ids_ranked = load_ranked_df()
-    article_count = st.slider('How many articles should be displayed?', 1, 200, 1)
+    article_count = st.slider('How many articles should be displayed?', 1, 2000, 1)
 
    #ids_ranked[:article_count]
     df_ranked = df.loc[ids_ranked[:article_count].index]
     df_ranked
 
-data = df_ranked[0]['abstract']
+st.map(df_ranked[[float('lat'), float('lat')]])
 
-plt.subplots(figsize = (8,8))
-
-wordcloud = WordCloud (
+#making a cloud of words
+data = df_ranked.iloc[0]['abstract']
+fig = plt.subplots(figsize = (8,8))
+wordcloud = WordCloud(
                     background_color = 'white',
                     width = 512,
                     height = 384
-                        ).generate(' '.join(data))
+                        ).generate(data)
 plt.imshow(wordcloud) # image show
 plt.axis('off')
+st.pyplot(fig[0])
