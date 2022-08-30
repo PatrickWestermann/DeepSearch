@@ -59,10 +59,11 @@ class ToolKit:
 
     def create_tbl(self, engine, tbl_name):
         try:
-            self.engine.connect()
+            engine.connect()
             print("Connection successful")
         except SQLAlchemyError as err:
             print("error", err.__cause__)  # this will give what kind of error
+
 
     def csv_to_db(self, engine, csv_file, tbl_name, on_exists='replace'):
         # creating a data frame
