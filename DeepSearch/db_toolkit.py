@@ -8,6 +8,9 @@ from sqlalchemy import event
 from sqlalchemy.exc import SQLAlchemyError
 import pandas as pd
 import connectorx as cx
+import pandas as pd
+import pickle
+import glob
 
 
 class ToolKit:
@@ -28,50 +31,46 @@ class ToolKit:
         """ create a database """
         engine = create_engine(
             'sqlite:///'+db, echo=False)
-        print(f"Connected to database >> {db}")
-        try:
-            with engine.connect() as conn:
-                conn.execute("SELECT 1")
-                conn.close()
-            print('Engine is valid')
-        except Exception as e:
-            print(f'Engine invalid: {str(e)}')
+        print(f"Database engine created >> {db}")
 
     def connect_db(self, db):
-        """ create a database connection to a database that resides
-            in the memory
-        """
-        self.engine = create_engine(
-            'sqlite:///'+db, echo=False)
-        print(f"Connected to database >> {db}")
-        try:
-            with self.engine.connect() as conn:
-                conn.execute("SELECT 1")
-            print('Engine is valid')
-        except Exception as e:
-            print(f'Engine invalid: {str(e)}')
-        return self.engine
+        """Create and run engine running db"""
+        engine = create_engine('sqlite:///'+db, echo=False)
+        print(f"Start engine >> {db}")
+        return engine
 
     def disconnect_db(self, engine):
-        self.engine = engine
-        self.engine.close()
-        print(f"Disconnected from database")
+        engine.close()
+        print(f"Disconnected from database engine")
 
     def create_tbl(self, engine, tbl_name):
-        try:
-            engine.connect()
-            print("Connection successful")
-        except SQLAlchemyError as err:
-            print("error", err.__cause__)  # this will give what kind of error
+        print("Not implemented yet.")
 
-
-    def csv_to_db(self, engine, csv_file, tbl_name, on_exists='replace'):
-        # creating a data frame
-        self.df = pd.read_csv(csv_file)
-        """Take a data frame and add it to a sqlite db"""
-        self.df = self.df.applymap(str)
-        self.df.to_sql(str(tbl_name), con=engine, if_exists=on_exists)
-        engine.close()
+    def csv_to_db(self, engine, csv_file, tmp_path, tbl_name, chunk_size=400000, on_exists='replace'):
+        """Take a data frame from csv file and add it to a sqlite db as table"""
+        separator = ","
+        # Read csv in chunks saved as pickles in tmp_path
+        reader = pd.read_csv(csv_file, sep=separator,
+                             chunksize=chunk_size,
+                             encoding='ISO-8859-1',
+                             low_memory=False)
+        for i, chunk in enumerate(reader):
+            tmp_path = tmp_path + "/data_{}.pkl".format(i+1)
+            with open(csv_file, "wb") as f:
+                pickle.dump(chunk, f, pickle.HIGHEST_PROTOCOL)
+        # Creating a data frame from the pickles
+        # Get list of pickle files
+        data_p_files = []
+        for name in glob.glob(tmp_path + "/data_*.pkl"):
+            data_p_files.append(name)
+        # Create data frame and add data from pickle files
+        data = pd.DataFrame([])
+        for i in range(len(data_p_files)):
+            data = data.append(pd.read_pickle(
+                data_p_files[i]), ignore_index=True)
+        # Add data frame to
+        data.to_sql(str(tbl_name), con=engine, if_exists=on_exists)
+        print(f"Data saved in table {tbl_name} of {engine}.")
 
     def tbl_to_df(self, db, tbl_name):
         # SQLAlchemy engine
@@ -82,10 +81,10 @@ class ToolKit:
 
     @event.listens_for(Engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):
-        self.cursor = self.dbapi_connection.cursor()
-        self.cursor.execute("PRAGMA journal_mode=WAL")
-        self.cursor.execute("PRAGMA synchronous=normal")
-        self.cursor.execute("PRAGMA temp_store=memory")
-        self.cursor.execute("PRAGMA mmap_size=30000000000")
-        self.cursor.close()
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=normal")
+        cursor.execute("PRAGMA temp_store=memory")
+        cursor.execute("PRAGMA mmap_size=30000000000")
+        cursor.close()
         return print("Pragma arguments added")
