@@ -147,14 +147,27 @@ class NLP:
 
         return self.weighted_words
 
+    def print_to_file(self, message, log_file='nlp_gpu_output.txt'):
+        print(message)
+        with open(log_file, 'a') as of:
+            of.write(message + '\n')
+
 
 if __name__ == "__main__":
     nlp_prep = NLP()
+
     data = nlp_prep.get_data()
+
     df = nlp_prep.dataframe(data)
+
     start = timer()
     clean_abstract = nlp_prep.clean(df)
-    print("Cleaning with GPU:", timer()-start)
+    time = timer()-start
+    message = f"Cleaning with GPU: {time}"
+    nlp_prep.print_to_file(message)
+
     start = timer()
     token = nlp_prep.tokenize(clean_abstract)
-    print("Tokenize with GPU:", timer()-start)
+    time = timer()-start
+    message = f"Tokenize with GPU: {time}"
+    nlp_prep.print_to_file(message)
