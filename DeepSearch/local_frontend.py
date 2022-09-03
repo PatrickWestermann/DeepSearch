@@ -34,7 +34,6 @@ search_terms = st.text_area('Put in the words, sparate them with an empty space'
 search_term_list = list(search_terms.split(" "))
 load = st.button("Let's find the most relevant articles!")
 
-
 #initialize session state
 if "load_state" not in st.session_state:
     st.session_state.load_state = False
@@ -46,33 +45,37 @@ if load or st.session_state.load_state:
         ids_ranked = nlp.rank(tokenized_df, words = search_term_list)
         return ids_ranked
     ids_ranked = load_ranked_df()
-    article_count = st.slider('How many articles should be displayed?', 1, 2000, 1)
-
-#ids_ranked[:article_count]
+#slider article count
+    article_count = st.slider('How many articles should be displayed?', 1, 2000, 1000)
     df_ranked = df.loc[ids_ranked[:article_count].index]
-    df_ranked
+#drop nans
+    df_ranked_no_nan = df_ranked.replace("<NA>",np.nan).dropna()[['lat','lon']].astype(float)
 
-df_ranked_no_nan = df_ranked.replace("<NA>",np.nan).dropna()[['lat','lon']].astype(float)
-
-st.map(df_ranked_no_nan)
-
-#heatmap
-map_hooray = folium.Map(location=[51.5074, 0.1278],
-                    zoom_start = 0)
-feature_group = folium.FeatureGroup('Locations')
-heat_data = [[row['lat'],row['lon']] for index, row in df_ranked_no_nan.iterrows()]
-HeatMap(heat_data).add_to(map_hooray)
-st_data = st_folium(map_hooray,width=725)
-
-
-#making a cloud of words
-data = df_ranked.iloc[0]['abstract']
-fig = plt.subplots(figsize = (8,8))
-wordcloud = WordCloud(
-                    background_color = 'white',
-                    width = 512,
-                    height = 384
-                        ).generate(data)
-plt.imshow(wordcloud) # image show
-plt.axis('off')
-st.pyplot(fig[0])
+#User_Choice
+if load or st.session_state.load_state:
+    st.session_state.load_state = True
+    opt = st.radio('Lets Explore:', ['Wordcloud', 'DotMap', 'Heatmap','Ranked DF'])
+    if opt =='Wordcloud':
+        data = df_ranked.iloc[0]['abstract']
+        fig = plt.subplots(figsize = (8,8))
+        wordcloud = WordCloud(
+                            background_color = 'white',
+                            width = 512,
+                            height = 384
+                                ).generate(data)
+        plt.imshow(wordcloud) # image show
+        plt.axis('off')
+        st.pyplot(fig[0])
+    if opt =='DotMap':
+        st.map(df_ranked_no_nan)
+    if opt =='Heatmap':
+        map_hooray = folium.Map(location=[51.5074, 0.1278],
+                            zoom_start = 0)
+        feature_group = folium.FeatureGroup('Locations')
+        heat_data = [[row['lat'],row['lon']] for index, row in df_ranked_no_nan.iterrows()]
+        HeatMap(heat_data).add_to(map_hooray)
+        st_data = st_folium(map_hooray,width=725)
+    if opt =='Ranked DF':
+        df_ranked
+    else:
+        print('Good luck exploring!')
