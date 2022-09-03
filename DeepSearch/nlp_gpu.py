@@ -1,6 +1,8 @@
 #!/usr/bin/python
+import pdb
 import pandas as pd
-from numba import jit, cuda
+from numba import jit, njit, cuda
+from numba.types import string
 from timeit import default_timer as timer
 import numpy as np
 from nltk.corpus import stopwords
@@ -28,12 +30,8 @@ class NLP:
         print("NPL functions: ")
         print("     get_data()")
         print("     dataframe(data, length=132820)")
-        print("     cleaning(text)")
-        print("     cleaning_ginsem(text)")
-        print("     clean(df)")
-        print("     clean_ginsem(df)")
+        print("     cleaning(df)")
         print("     tokenize(df)")
-        print(" Use saved weighted_words.csv to enter LDA ")
 
     def get_data(self):
         """import data from MongoDB"""
@@ -49,8 +47,10 @@ class NLP:
 
         return self.mydoc
 
+    @jit(target_backend='cuda')
     def dataframe(self, mydoc, length=132820):
-        """convert mongodb data to dataframe (full = 132820 rows)"""
+        """convert mongodb data to dataframe"""
+        print("----------Create DataFrame----------")
         self.mydoc = mydoc
         self.length = length
         # data to dataframe and limit length
@@ -61,61 +61,66 @@ class NLP:
         self.df['pubDate'] = self.df['pubDate'].str.extract(r'(\d{4})')
 
         print('----------DataFrame created----------')
-        print(self.df.head(15))
+        print(self.df.head(5))
         return self.df
 
-    @jit(target_backend='cuda')
-    def cleaning(self, text):
+    #@jit(target_backend='cuda')
+    def cleaning(self, df):
         """cleaning function for the abstract"""
-        self.text = text
-        # extract medical terms
-        self.doc = nlp(self.text)
+        self.df = df.copy()
+        self.counter = 0
+        for text in self.df.abstract:
+            #breakpoint()
+            print(f"---Cleaning abstact cell: {self.counter}---")
+            # extract medical terms
+            self.doc = nlp(text)
+            self.doc_string = ""
+            for count in range(len(self.doc.ents)):
+                print(count)
+                self.doc_string = self.doc_string + \
+                    " " + str(self.doc.ents[count])
+            #self.doc_string = " ".join(str(a) for a in self.doc.ents)
+            print(self.doc_string)
+            # transform abtract words into lower case
+            self.words = self.doc_string.lower()
+            # remove punctuations
+            # for punctuation in string.punctuation:
+            #     self.words = self.words.replace(punctuation, "")
+            # # remove digits
+            # self.words = "".join(
+            #     char for char in self.words if not char.isdigit())
+            # # tokenize sentences
+            # self.tokenized_text = word_tokenize(self.words)
+            # # remove stop words
+            # self.stop_words = set(stopwords.words('english'))
+            # self.tokenized_sentence_cleaned = [
+            #     w for w in self.tokenized_text if not w in self.stop_words
+            # ]
+            # # standardize verbs
+            # self.verb_lemmatized = [
+            #     WordNetLemmatizer().lemmatize(word, pos="v") for word in self.tokenized_sentence_cleaned
+            # ]
+            # # standardize nouns
+            # self.noun_lemmatized = [
+            #     WordNetLemmatizer().lemmatize(word, pos="n") for word in self.verb_lemmatized
+            # ]
+            # # only words longer than 3 charachters:
+            # self.length_3 = [
+            #     word for word in self.noun_lemmatized if len(word) > 3
+            # ]
+            # # re-join list into sentences
+            # self.cleaned_txt = " ".join(self.length_3)
+            #self.df.at[self.counter, 'abstract'] = self.cleaned_txt
+            self.df.at[self.counter, 'abstract'] = self.words
+            #self.df['abstract'].loc[self.df.index[self.counter]
+            #                        ] = self.cleaned_txt
+            #self.df.abstract[d.abstract == text] = self.cleaned_txt
+            self.counter += 1
 
-        self.doc_string = " ".join(str(a) for a in self.doc.ents)
+        self.df.to_csv('cleaned_df.csv', encoding='utf-8', index=False)
+        print('-----Saved as cleaned_df.csv------')
 
-        # transform abtract words into lower case
-        self.words = self.doc_string.lower()
-
-        # remove punctuations
-        for punctuation in string.punctuation:
-            self.words = self.words.replace(punctuation, '')
-
-        # remove digits
-        self.words = ''.join(char for char in self.words if not char.isdigit())
-
-        # tokenize sentences
-        self.tokenized_text = word_tokenize(self.words)
-
-        # remove stop words
-        self.stop_words = set(stopwords.words('english'))
-
-        self.tokenized_sentence_cleaned = [
-            w for w in self.tokenized_text if not w in self.stop_words
-        ]
-
-        # standardize verbs
-        self.verb_lemmatized = [
-            WordNetLemmatizer().lemmatize(word, pos="v") for word in self.tokenized_sentence_cleaned
-        ]
-
-        # standardize nouns
-        self.noun_lemmatized = [
-            WordNetLemmatizer().lemmatize(word, pos="n") for word in self.verb_lemmatized
-        ]
-
-        # only words longer than 3 charachters:
-        self.length_3 = [
-            word for word in self.noun_lemmatized if len(word) > 3]
-
-        # re-join list into sentences
-        self.cleaned_txt = " ".join(length_3)
-
-        self.cleaned_txt.to_csv(
-                    'cleaned_txt.csv', encoding='utf-8', index=False)
-
-        print('-----Saved as cleaned_txt.csv------')
-
-        return self.cleaned_txt
+        return self.df
 
     @jit(target_backend='cuda')
     def tokenize(self, df):
@@ -158,16 +163,18 @@ if __name__ == "__main__":
 
     data = nlp_prep.get_data()
 
-    df = nlp_prep.dataframe(data)
+    df = nlp_prep.dataframe(data, length=10)
 
     start = timer()
-    clean_abstract = nlp_prep.clean(df)
+    clean_abstract = nlp_prep.cleaning(df)
     time = timer()-start
     message = f"Cleaning with GPU: {time}"
     nlp_prep.print_to_file(message)
 
-    start = timer()
-    token = nlp_prep.tokenize(clean_abstract)
-    time = timer()-start
-    message = f"Tokenize with GPU: {time}"
-    nlp_prep.print_to_file(message)
+#    start = timer()
+#    token = nlp_prep.tokenize(clean_abstract)
+#    time = timer()-start
+#    message = f"Tokenize with GPU: {time}"
+#    nlp_prep.print_to_file(message)
+
+    print(" Check progression time in nlp_gpu_output.txt")
