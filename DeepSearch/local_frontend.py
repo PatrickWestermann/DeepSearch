@@ -6,6 +6,10 @@ import nlp
 import timeit
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
+import numpy as np
+import folium
+from streamlit_folium import st_folium
+from folium.plugins import HeatMap
 
 st.header('Prototype Research Locator')
 #token = pd.read_csv('data/tokenized_df.csv')
@@ -14,7 +18,6 @@ Hey, here you can use our amazing research locator!
 First you need to wait a bit until the most recent dataset is pulled from the mongo db cloud! This might take a minute but your data will be nice and fresh ;)
 ''')
 #loads the dataframe when the session is started
-start = timeit.timeit()
 @st.cache(allow_output_mutation=True)
 def get_df():
     mydoc = nlp.get_data()
@@ -22,8 +25,6 @@ def get_df():
     tokenized_df = nlp.tokenize(df)
     return df, tokenized_df
 df, tokenized_df = get_df()
-end = timeit.timeit()
-st.write(f"It took {end - start} to load the data")
 
 #let the user put in the search terms and start ranking process
 st.markdown('''
@@ -47,11 +48,22 @@ if load or st.session_state.load_state:
     ids_ranked = load_ranked_df()
     article_count = st.slider('How many articles should be displayed?', 1, 2000, 1)
 
-   #ids_ranked[:article_count]
+#ids_ranked[:article_count]
     df_ranked = df.loc[ids_ranked[:article_count].index]
     df_ranked
 
-st.map(df_ranked[[float('lat'), float('lat')]])
+df_ranked_no_nan = df_ranked.replace("<NA>",np.nan).dropna()[['lat','lon']].astype(float)
+
+st.map(df_ranked_no_nan)
+
+#heatmap
+map_hooray = folium.Map(location=[51.5074, 0.1278],
+                    zoom_start = 0)
+feature_group = folium.FeatureGroup('Locations')
+heat_data = [[row['lat'],row['lon']] for index, row in df_ranked_no_nan.iterrows()]
+HeatMap(heat_data).add_to(map_hooray)
+st_data = st_folium(map_hooray,width=725)
+
 
 #making a cloud of words
 data = df_ranked.iloc[0]['abstract']

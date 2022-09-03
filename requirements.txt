@@ -32,3 +32,4 @@ xmltodict
 nltk
 pymongo
 wordcloud
+folium
