@@ -35,7 +35,7 @@ class LDA():
         self.tfidf_corpus = [self.tfidf[self.corpus[c]] for c in range(len(self.corpus))]
         self.model = ''
 
-    def model(self):
+    def ldamodel(self):
         model = LdaModel(
             corpus=self.tfidf_corpus,
             id2word=self.id2word,
@@ -114,10 +114,12 @@ class LDA():
         return top10_words
 
 if __name__=='__main__':
-    data = nlp2.get_data()
-    df = nlp2.dataframe(data)
+    # data = nlp2.get_data()
+    # df = nlp2.dataframe(data)
+    df = pd.read_csv('topic_cleanedabstract_year.csv').set_index(['_id'])
+    df.clean_abstr = df.clean_abstr.astype(str)
     lda = LDA(df)
-    model = lda.model()
+    model = lda.ldamodel()
     topics_ = lda.topics()
     abs_topics = lda.abstract_topics()
     top = lda.top_words()
