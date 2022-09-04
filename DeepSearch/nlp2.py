@@ -30,23 +30,17 @@ def get_data():
     myclient = pymongo.MongoClient(client)
     mydb = myclient["cleanpapers"]
     mycol = mydb["cleanedf"]
-    mydoc = mycol.find({}, {"_id":1,
-                            "articleTitle":1,
-                            "abstract":1,
-                            "pubDate":1,
-                            "affiliations":1})
+    mydoc = mycol.find({})
 
     print('----------Data imported----------')
 
     return mydoc
 
-def dataframe(mydoc,length=132820):
+def dataframe(mydoc,length=132813):
     """convert mongodb data to dataframe (full = 132820 rows)"""
     # data to dataframe and limit length
     df = pd.DataFrame(list(mydoc)).set_index(['_id'])
     df = df[df.abstract != '.'].iloc[:length,:]
-    # extract year from the pubDate column
-    df['pubDate'] = df['pubDate'].str.extract(r'(\d{4})')
 
     print ('----------DataFrame created----------')
     print (df.head(15))
@@ -92,14 +86,17 @@ def clean(df):
 
     return df_
 
-def tokenize(df):
+def tokenize(df,column='clean_abstr'):
     """generate tokenized dataframe"""
     # intitialize vectorizer model
     tfidf_vectorizer = TfidfVectorizer(use_idf=True,
                                        analyzer='word',
-                                       stop_words='english')
+                                       stop_words='english',
+                                       max_df=0.6,min_df=15,
+                                       max_features=10000)
     # fit_transform abstract
-    tfidf_abstract = tfidf_vectorizer.fit_transform(df.abstract)
+    df[column] = df[column].fillna('')
+    tfidf_abstract = tfidf_vectorizer.fit_transform(df[column])
     # create data frame with columns names
     weighted_words = pd.DataFrame(tfidf_abstract.toarray(),
                 columns = tfidf_vectorizer.get_feature_names(),index=df.index).round(2)
@@ -117,51 +114,28 @@ def rank(token,words=['brain','mouse','animal',
                       'preclinical']):
 
     """rank abstracts based on chosen words"""
-
     token_df = token.copy()
-
     # clean tokenized data frame
-
     selected_tokens = token_df[words].replace('',0).astype(float)
-
     # remove rows with only 0 results
-
     selected_tokens = selected_tokens.loc[~(selected_tokens==0).all(axis=1)]
-
     # create count columns (1 - chosen word was encountered / 0 - chosen word was not encountered)
-
     columns = selected_tokens.columns
-
     length_words = selected_tokens.shape[1]
-
     for index, row in selected_tokens.iterrows():
-
         for column in columns:
-
             new_column = f'{column}_count'
-
             if row[column] > 0:
-
                 selected_tokens.loc[index, new_column] = 1
-
             elif row[column] == 0:
-
                 selected_tokens.loc[index, new_column] = 0
-
     # get average frequency of chosen words
-
     selected_tokens['mean'] = (selected_tokens[list(columns)].sum(axis=1)) / length_words
-
     # get how many chosen words were encountered
-
     selected_tokens['count'] = selected_tokens.iloc[: , length_words:-1].sum(axis=1)
-
     # sort rank by 1. how many chosen words were encountered and 2. average frequency of chosen words
-
     df_rank = selected_tokens.sort_values(by=['count','mean'],ascending=False)[['count','mean']]
-
     # remove rows with only 0 values
-
     df_rank = df_rank.loc[~(df_rank==0).all(axis=1)]
 
     print ('----------Abstracts ranked----------')
@@ -178,15 +152,15 @@ def clean_abstracts():
 
     return clean_abstract
 
-def main():
+def token():
+    "generate tokenized df abstracts"
 
-    mydoc = get_data()
-    df = dataframe(mydoc)
+    data = get_data()
+    df = dataframe(data)
     token = tokenize(df)
 
     return token
 
-
 if __name__ == '__main__':
 
-    clean_abstracts()
+    token()
