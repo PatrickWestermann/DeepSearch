@@ -183,4 +183,6 @@ def token():
 
 if __name__ == '__main__':
 
-    token()
+    df = pd.read_csv('topic_cleanedabstract_year.csv').set_index(['_id'])
+    df.clean_abstr = df.clean_abstr.astype(str)
+    token = tokenize(df)
