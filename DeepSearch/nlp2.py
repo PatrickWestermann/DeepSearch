@@ -29,7 +29,18 @@ def get_data():
     myclient = pymongo.MongoClient(client)
     mydb = myclient["cleanpapers"]
     mycol = mydb["cleanedf"]
-    mydoc = mycol.find({}) # retrieve all columns
+    mydoc = mycol.find({},
+                       {
+        "_id":1,
+        "articleTitle":1,
+        "clean_abstr":1,
+        "topic_number":1,
+        "topic_name":1,
+        "city":1,
+        "lat":1,
+        "lon":1,
+        "year":1
+        }) # retrieve important columns
 
     print('----------Data imported----------')
 
@@ -39,7 +50,8 @@ def dataframe(mydoc,length=132813):
     """convert mongodb data to dataframe (full = 132820 rows)"""
     # data to dataframe and limit length
     df = pd.DataFrame(list(mydoc)).set_index(['_id'])
-    df = df[df.abstract != '.'].iloc[:length,:]
+    df = df.iloc[:length,:]
+    df.clean_abstr = df.clean_abstr.astype(str)
 
     print ('----------DataFrame created----------')
     print (df.head(15))
