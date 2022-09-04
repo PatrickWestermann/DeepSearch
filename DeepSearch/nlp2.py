@@ -20,7 +20,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.neighbors import NearestNeighbors
 from sklearn.utils import parallel_backend
 
-nlp = spacy.load("en_core_sci_lg")
 warnings.filterwarnings('ignore')
 
 def get_data():
@@ -30,7 +29,7 @@ def get_data():
     myclient = pymongo.MongoClient(client)
     mydb = myclient["cleanpapers"]
     mycol = mydb["cleanedf"]
-    mydoc = mycol.find({})
+    mydoc = mycol.find({}) # retrieve all columns
 
     print('----------Data imported----------')
 
@@ -50,6 +49,7 @@ def dataframe(mydoc,length=132813):
 def cleaning(text):
     """cleaning function for the abstract"""
     # extract medical terms
+    nlp = spacy.load("en_core_sci_lg")
     doc = nlp(text)
     doc_string = " ".join(str(a) for a in doc.ents)
     # transform abtract words into lower case
@@ -84,22 +84,30 @@ def clean(df):
     # apply clean function to abstracts
     df_.abstract = df_.abstract.astype(str).apply(cleaning)
 
+    print ('----------Abstract cleaned----------')
+
     return df_
 
 def tokenize(df,column='clean_abstr'):
     """generate tokenized dataframe"""
     # intitialize vectorizer model
-    tfidf_vectorizer = TfidfVectorizer(use_idf=True,
-                                       analyzer='word',
-                                       stop_words='english',
-                                       max_df=0.6,min_df=15,
-                                       max_features=10000)
+    tfidf_vectorizer = TfidfVectorizer(
+        use_idf=True,
+        analyzer='word',
+        stop_words='english',
+        max_df=0.6,
+        min_df=15,
+        max_features=10000
+        )
     # fit_transform abstract
     df[column] = df[column].fillna('')
     tfidf_abstract = tfidf_vectorizer.fit_transform(df[column])
     # create data frame with columns names
-    weighted_words = pd.DataFrame(tfidf_abstract.toarray(),
-                columns = tfidf_vectorizer.get_feature_names(),index=df.index).round(2)
+    weighted_words = pd.DataFrame(
+        tfidf_abstract.toarray(),
+        columns = tfidf_vectorizer.get_feature_names(),
+        index=df.index
+        ).round(2)
 
     print ('----------Abstract tokenized----------')
     print (weighted_words.head(15))
