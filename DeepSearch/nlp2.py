@@ -33,6 +33,7 @@ def get_data():
                        {
         "_id":1,
         "articleTitle":1,
+        "abstract":1,
         "clean_abstr":1,
         "topic_number":1,
         "topic_name":1,
@@ -100,7 +101,7 @@ def clean(df):
 
     return df_
 
-def tokenize(df,column='clean_abstr'):
+def tokenize(df,column='clean_abstr',max_features=10000):
     """generate tokenized dataframe"""
     # intitialize vectorizer model
     tfidf_vectorizer = TfidfVectorizer(
@@ -109,7 +110,7 @@ def tokenize(df,column='clean_abstr'):
         stop_words='english',
         max_df=0.6,
         min_df=15,
-        max_features=10000
+        max_features=max_features
         )
     # fit_transform abstract
     df[column] = df[column].fillna('')
